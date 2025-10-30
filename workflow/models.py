@@ -17,11 +17,12 @@ class UdiFiaWorkflow(models.Model):
     has_udi_health_impact = models.CharField(max_length=5)
     has_impact_in_new_gtin = models.CharField(max_length=5)
 
-class ChangeCategories(models.Model):
-    name = models.CharField(max_length=50)
-    image = models.ImageField()
+# class ChangeCategories(models.Model):
+#     name = models.CharField(max_length=50)
+#     image = models.ImageField()
 
 class ChangesInvolved(models.Model):
     workflow = models.ForeignKey(UdiFiaWorkflow, on_delete=models.CASCADE)
-    change_category = models.ForeignKey(ChangeCategories, on_delete=models.SET_NULL,null=True)
+    change_category = models.CharField(max_length=60)
+    # change_category = models.ForeignKey(ChangeCategories, on_delete=models.SET_NULL,null=True)
     change_description = models.TextField(blank=True, null=True)
