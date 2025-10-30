@@ -1,12 +1,12 @@
 from rest_framework import serializers
-from .models import UdiFiaWorkflow, ChangeCategories, ChangesInvolved
+from .models import UdiFiaWorkflow,  ChangesInvolved
 
-class ChangeCategoriesSerializer(serializers.ModelSerializer):
-    image = serializers.ImageField(required=False, allow_null=True)
+# class ChangeCategoriesSerializer(serializers.ModelSerializer):
+#     image = serializers.ImageField(required=False, allow_null=True)
 
-    class Meta:
-        model = ChangeCategories
-        fields = ['id', 'name', 'image']
+#     class Meta:
+#         model = ChangeCategories
+#         fields = ['id', 'name', 'image']
 
 
 class UdiFiaWorkflowSerializer(serializers.ModelSerializer):
@@ -37,13 +37,10 @@ class UdiFiaWorkflowSerializer(serializers.ModelSerializer):
 class ChangesInvolvedSerializer(serializers.ModelSerializer):
     # writable by PK for create/update, but include nested read representation
     workflow = serializers.PrimaryKeyRelatedField(queryset=UdiFiaWorkflow.objects.all())
-    change_category = serializers.PrimaryKeyRelatedField(
-        queryset=ChangeCategories.objects.all(), allow_null=True, required=False
-    )
+
 
     # nested read-only fields
     workflow_detail = UdiFiaWorkflowSerializer(source='workflow', read_only=True)
-    change_category_detail = ChangeCategoriesSerializer(source='change_category', read_only=True)
 
     class Meta:
         model = ChangesInvolved
