@@ -26,9 +26,8 @@ class UdiFiaWorkflowViewSet(viewsets.ModelViewSet):
 
 
 class ChangesInvolvedViewSet(viewsets.ModelViewSet):
-    queryset = ChangesInvolved.objects.select_related('workflow', 'change_category').all().order_by('-id')
+    queryset = ChangesInvolved.objects.all().order_by('-id')
     serializer_class = ChangesInvolvedSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['workflow', 'change_category']
     search_fields = ['change_description']

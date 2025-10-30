@@ -35,21 +35,12 @@ class UdiFiaWorkflowSerializer(serializers.ModelSerializer):
 
 
 class ChangesInvolvedSerializer(serializers.ModelSerializer):
-    # writable by PK for create/update, but include nested read representation
-    workflow = serializers.PrimaryKeyRelatedField(queryset=UdiFiaWorkflow.objects.all())
 
-
-    # nested read-only fields
-    workflow_detail = UdiFiaWorkflowSerializer(source='workflow', read_only=True)
 
     class Meta:
         model = ChangesInvolved
         fields = [
-            'id',
             'workflow',
-            'workflow_detail',
             'change_category',
-            'change_category_detail',
             'change_description',
         ]
-        read_only_fields = ['workflow_detail', 'change_category_detail']
