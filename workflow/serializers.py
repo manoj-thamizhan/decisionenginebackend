@@ -20,6 +20,7 @@ class UdiFiaWorkflowSerializer(serializers.ModelSerializer):
             'id',
             'change_number',
             'udr_fia_number',
+            'status',
             'title',
             'region',
             'gtin_change',
