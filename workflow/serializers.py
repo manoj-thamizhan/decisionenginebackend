@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import UdiFiaWorkflow,  ChangesInvolved
+from .models import Rule, UdiFiaWorkflow,  ChangesInvolved
 
 # class ChangeCategoriesSerializer(serializers.ModelSerializer):
 #     image = serializers.ImageField(required=False, allow_null=True)
@@ -20,6 +20,7 @@ class UdiFiaWorkflowSerializer(serializers.ModelSerializer):
             'id',
             'change_number',
             'udr_fia_number',
+            'country',
             'status',
             'title',
             'region',
@@ -32,6 +33,30 @@ class UdiFiaWorkflowSerializer(serializers.ModelSerializer):
             'gtin_evaluation',
             'has_udi_health_impact',
             'has_impact_in_new_gtin',
+        ]
+
+class RuleSerializer(serializers.ModelSerializer):
+    created_at = serializers.DateTimeField(read_only=True)
+    updated_at = serializers.DateTimeField(read_only=True)
+
+    class Meta:
+        model = Rule
+        # include id so frontend can refer to instances
+        fields = [
+            'id',
+           
+            'action_item',
+            'region',
+            'gtin_change',
+            'created_at',
+            'updated_at',
+            'product_type',
+            'product_category_unit',
+            'product_category_level',
+            'gtin_evaluation',
+            'has_udi_health_impact',
+            'has_impact_in_new_gtin',
+
         ]
 
 
