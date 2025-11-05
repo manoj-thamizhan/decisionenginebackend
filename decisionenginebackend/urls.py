@@ -16,7 +16,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path , include
-
+admin.site.site_header = "Decision engine admin"  # Changes the main header on top of the page
+admin.site.site_title = "Decision engine admin"  # Changes the browser tab title
+admin.site.index_title = "Decision engine admin"
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include('workflow.urls') ),
