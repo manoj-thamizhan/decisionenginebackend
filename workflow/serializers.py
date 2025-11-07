@@ -10,55 +10,65 @@ from .models import Rule, UdiFiaWorkflow,  ChangesInvolved
 
 
 class UdiFiaWorkflowSerializer(serializers.ModelSerializer):
-    created_at = serializers.DateTimeField(read_only=True)
-    updated_at = serializers.DateTimeField(read_only=True)
+    
 
     class Meta:
         model = UdiFiaWorkflow
         # include id so frontend can refer to instances
         fields = [
             'id',
-            'change_number',
-            'udr_fia_number',
-            'country',
-            'status',
-            'title',
-            'region',
-            'gtin_change',
-            'created_at',
-            'updated_at',
-            'product_type',
-            'product_category_unit',
-            'product_category_level',
-            'gtin_evaluation',
-            'has_udi_health_impact',
-            'has_impact_in_new_gtin',
+            'health_authority',
+            'udi_regulation',
+            'category',
+            'data_property',
+            'data_attribute_ha_field_name',
+            'gude_field_name',
+            'jnj_udi_data_element',
+            'gude_field_number',
+            'budi_attribute_eudamed_only',
+            'gs1_gtin_trigger_100782299_appendix_b',
+            'health_authority_gtin_trigger',
+            'jjmt_use_directive',
+            'mandatory_field_in_database',
+            'field_type',
+            'add_flag',
+            'edit_flag',
+            'delete_flag',
+            'change_condition_or_scenarios',
+            'additional_change_request_requirements',
+            'dri_comments',
+            'gtin_outcome_action',
+            'data_source_outcome_action',
         ]
 
 class RuleSerializer(serializers.ModelSerializer):
-    created_at = serializers.DateTimeField(read_only=True)
-    updated_at = serializers.DateTimeField(read_only=True)
-
     class Meta:
         model = Rule
-        # include id so frontend can refer to instances
         fields = [
             'id',
-           
-            'action_item',
-            'region',
-            'gtin_change',
-            'created_at',
-            'updated_at',
-            'product_type',
-            'product_category_unit',
-            'product_category_level',
-            'gtin_evaluation',
-            'has_udi_health_impact',
-            'has_impact_in_new_gtin',
-
+            'health_authority',
+            'udi_regulation',
+            'category',
+            'data_property',
+            'data_attribute_ha_field_name',
+            'gude_field_name',
+            'jnj_udi_data_element',
+            'gude_field_number',
+            'budi_attribute_eudamed_only',
+            'gs1_gtin_trigger_100782299_appendix_b',
+            'health_authority_gtin_trigger',
+            'jjmt_use_directive',
+            'mandatory_field_in_database',
+            'field_type',
+            'add_flag',
+            'edit_flag',
+            'delete_flag',
+            'change_condition_or_scenarios',
+            'additional_change_request_requirements',
+            'dri_comments',
+            'gtin_outcome_action',
+            'data_source_outcome_action',
         ]
-
 
 class ChangesInvolvedSerializer(serializers.ModelSerializer):
 

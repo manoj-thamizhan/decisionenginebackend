@@ -2,7 +2,9 @@ from rest_framework import viewsets, filters
 from rest_framework.response import Response
 from rest_framework import status 
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from django_filters.rest_framework import DjangoFilterBackend  # optional, if you have django-filter
+from django_filters.rest_framework import DjangoFilterBackend
+
+from workflow.utils import get_distinct_values_from_target_for_source  # optional, if you have django-filter
 from .models import PLMWindchillMockdata, UdiFiaWorkflow,  ChangesInvolved,Rule
 from .serializers import (
     UdiFiaWorkflowSerializer,
@@ -17,17 +19,32 @@ class UdiFiaWorkflowViewSet(viewsets.ModelViewSet):
     queryset = UdiFiaWorkflow.objects.all().order_by('-created_at')
     serializer_class = UdiFiaWorkflowSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['region', 'product_type', 'product_category_unit', 'product_category_level', 'gtin_change']
-    search_fields = ['title', 'change_number', 'udr_fia_number']
     ordering_fields = ['created_at', 'updated_at', 'title']
-    MODELB_FILTERABLE_FIELDS = [ "region",
-    'country' ,
-    'gtin_change',
-    'product_category_unit',
-    'product_category_level',
-    'gtin_evaluation',
-    'has_udi_health_impact'
-    'has_impact_in_new_gtin']
+    MODELB_FILTERABLE_FIELDS = [
+            'id',
+            'health_authority',
+            'udi_regulation',
+            'category',
+            'data_property',
+            'data_attribute_ha_field_name',
+            'gude_field_name',
+            'jnj_udi_data_element',
+            'gude_field_number',
+            'budi_attribute_eudamed_only',
+            'gs1_gtin_trigger_100782299_appendix_b',
+            'health_authority_gtin_trigger',
+            'jjmt_use_directive',
+            'mandatory_field_in_database',
+            'field_type',
+            'add_flag',
+            'edit_flag',
+            'delete_flag',
+            'change_condition_or_scenarios',
+            'additional_change_request_requirements',
+            'dri_comments',
+            'gtin_outcome_action',
+            'data_source_outcome_action',
+        ]
 
     @transaction.atomic
     def partial_update(self, request, *args, **kwargs):
@@ -40,7 +57,6 @@ class UdiFiaWorkflowViewSet(viewsets.ModelViewSet):
         """
         instance = self.get_object()
 
-        # 1) Build cleaned dict from request.data (exclude None and blank strings)
         cleaned = {}
         for k, v in request.data.items():
             if k is None:
@@ -51,35 +67,43 @@ class UdiFiaWorkflowViewSet(viewsets.ModelViewSet):
                 continue
             cleaned[k] = v
 
-        # 2) Build filter kwargs (only allow whitelisted fields)
         filter_kwargs = {}
         for k, v in cleaned.items():
             if k in self.MODELB_FILTERABLE_FIELDS:
                 filter_kwargs[k] = v
             else:
-                # fallback to icontains if the field isn't in whitelist
                 filter_kwargs[f"{k}__icontains"] = v
 
-        # 3) Filter ModelB
         try:
             modelb_qs = Rule.objects.filter(**filter_kwargs)
         except Exception:
             modelb_qs = Rule.objects.none()
 
-        # 4) Find the ModelB field with least distinct (non-null, non-blank) values
-        least_field_info = None  # will be dict: {"field":name, "count":n, "sample": [...]}
+        least_field_info = None 
 
-        # build candidate fields: concrete, not many-to-many, not pk
-        candidate_fields = [ "region",
-                            'country' ,
-                            'gtin_change',
-                            'product_category_unit',
-                            'product_category_level',
-                            'gtin_evaluation',
-                            'has_udi_health_impact'
-                            'has_impact_in_new_gtin']
+        candidate_fields = [
+            'health_authority',
+            'udi_regulation',
+            'category',
+            'data_property',
+            'data_attribute_ha_field_name',
+            'gude_field_name',
+            'jnj_udi_data_element',
+            'gude_field_number',
+            'budi_attribute_eudamed_only',
+            'gs1_gtin_trigger_100782299_appendix_b',
+            'health_authority_gtin_trigger',
+            'jjmt_use_directive',
+            'mandatory_field_in_database',
+            'field_type',
+            'add_flag',
+            'edit_flag',
+            'delete_flag',
+            'change_condition_or_scenarios',
+            'additional_change_request_requirements',
+            'dri_comments',
+        ]
 
-        # if queryset is empty, skip the expensive counting loop
         if modelb_qs.exists():
             best_count = None
             best_field = None
@@ -88,31 +112,25 @@ class UdiFiaWorkflowViewSet(viewsets.ModelViewSet):
             for f in candidate_fields:
                 fname = f
 
-                # prepare queryset to count distinct non-null/non-blank values
                 try:
                     q = modelb_qs
-                    # exclude NULLs
                     q = q.exclude(**{f"{fname}__isnull": True})
 
-                    # if char/text field, exclude empty string too
                     internal = getattr(f, "get_internal_type", None)
                     if callable(internal):
                         t = f.get_internal_type()
                         if t in ("CharField", "TextField"):
                             q = q.exclude(**{fname: ""})
 
-                    # count distinct values for this field
                     distinct_count = q.values(fname).distinct().count()
 
                     
 
-                    # update best/least
                     if (best_count is None or distinct_count < best_count) and distinct_count > 1:
                         best_count = distinct_count
                         best_field = fname
 
                 except Exception:
-                    # skip fields that cause lookup problems
                     continue
 
             if best_field is not None:
@@ -122,12 +140,10 @@ class UdiFiaWorkflowViewSet(viewsets.ModelViewSet):
                     "sample_values": best_sample,
                 }
 
-        # 5) perform partial update of ModelA
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
 
-        # 6) serialize ModelB results (be careful about returning many rows; consider limiting/pagination)
         modelb_serializer = RuleSerializer(modelb_qs, many=True)
 
         # 7) return combined response
@@ -135,7 +151,8 @@ class UdiFiaWorkflowViewSet(viewsets.ModelViewSet):
             "updated": serializer.data,
             "filtered_modelb": modelb_serializer.data,
             'is_finalized':len(modelb_serializer.data) == 1,
-            'action_item' : modelb_serializer.data[0]['action_item'] if len(modelb_serializer.data) == 1 else None,
+            'action_item' : modelb_serializer.data[0]['gtin_outcome_action'] if len(modelb_serializer.data) == 1 else None,
+            'data_source_outcome' : modelb_serializer.data[0]['data_source_outcome_action'] if len(modelb_serializer.data) == 1 else None,
             "least_distinct_field_in_modelb": least_field_info
         }, status=status.HTTP_200_OK)
 
@@ -334,3 +351,15 @@ class WorkflowLookupByIdentifier(APIView):
 
 
         return Response(results, status=status.HTTP_200_OK)
+
+class DistinctOptionsAPIView(APIView):
+    def get(self, request, pk):
+        try:
+            data = get_distinct_values_from_target_for_source(
+                source_model=UdiFiaWorkflow,
+                target_model=Rule,
+                pk=pk,
+            )
+            return Response(data)
+        except Exception as e:
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)

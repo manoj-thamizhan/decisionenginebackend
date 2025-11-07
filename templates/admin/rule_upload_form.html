@@ -1,0 +1,17 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block content %}
+  <div class="app-rule module">
+    <h1>Upload Rule schema (.xlsx)</h1>
+    <form method="post" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+      <table>
+        {{ form.as_table }}
+      </table>
+      <input type="submit" class="default" value="Upload and Replace All Rules">
+      <a href="{{ changelist_url }}">Cancel</a>
+    </form>
+    <p><strong>Note:</strong> Uploading will empty the existing Rule table before import.</p>
+  </div>
+{% endblock %}
