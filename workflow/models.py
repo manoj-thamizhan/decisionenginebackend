@@ -28,6 +28,29 @@ class UdiFiaWorkflow(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+class Flow(models.Model):
+    """
+    Stores a React Flow diagram.
+    - name: human readable name
+    - nodes: JSON representation of nodes (array/object depending on your frontend)
+    - edges: JSON representation of edges
+    - node_id: an optional "current node id" or metadata from frontend
+    - owner: optional FK to user (nullable) — remove if not needed
+    """
+    name = models.CharField(max_length=255)
+    nodes = models.JSONField()
+    edges = models.JSONField()
+    node_id = models.CharField(max_length=255, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("-updated_at",)
+
+    def __str__(self):
+        return f"{self.name} ({self.id})"
+
+
 class Rule(models.Model):
     health_authority = models.CharField(max_length=100, null=True, blank=True)
     udi_regulation = models.CharField(max_length=100, null=True, blank=True)

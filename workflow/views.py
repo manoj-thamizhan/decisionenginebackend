@@ -5,8 +5,9 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from django_filters.rest_framework import DjangoFilterBackend
 
 from workflow.utils import get_distinct_values_from_target_for_source  # optional, if you have django-filter
-from .models import PLMWindchillMockdata, UdiFiaWorkflow,  ChangesInvolved,Rule
+from .models import Flow, PLMWindchillMockdata, UdiFiaWorkflow,  ChangesInvolved,Rule
 from .serializers import (
+    FlowSerializer,
     UdiFiaWorkflowSerializer,
     ChangesInvolvedSerializer,
     RuleSerializer
@@ -351,6 +352,17 @@ class WorkflowLookupByIdentifier(APIView):
 
 
         return Response(results, status=status.HTTP_200_OK)
+
+
+
+class FlowViewSet(viewsets.ModelViewSet):
+    """
+    Provides list, retrieve, create, update, partial_update, destroy
+    """
+    queryset = Flow.objects.all()
+    serializer_class = FlowSerializer
+
+
 
 class DistinctOptionsAPIView(APIView):
     def get(self, request, pk):

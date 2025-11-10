@@ -1,12 +1,29 @@
 from rest_framework import serializers
-from .models import Rule, UdiFiaWorkflow,  ChangesInvolved
+from .models import Rule, UdiFiaWorkflow,  ChangesInvolved, Flow
 
-# class ChangeCategoriesSerializer(serializers.ModelSerializer):
-#     image = serializers.ImageField(required=False, allow_null=True)
 
-#     class Meta:
-#         model = ChangeCategories
-#         fields = ['id', 'name', 'image']
+
+
+class FlowSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Flow
+        fields = ("id", "name", "nodes", "edges", "node_id",  "created_at", "updated_at")
+        read_only_fields = ("id", "owner", "created_at", "updated_at")
+
+    def validate_nodes(self, value):
+        # Basic validation: ensure nodes is a list or dict (tweak as required)
+        if not isinstance(value, (list, dict)):
+            raise serializers.ValidationError("nodes must be a JSON array or object.")
+        return value
+
+    def validate_edges(self, value):
+        if not isinstance(value, (list, dict)):
+            raise serializers.ValidationError("edges must be a JSON array or object.")
+        return value
+
+
+
+
 
 
 class UdiFiaWorkflowSerializer(serializers.ModelSerializer):
