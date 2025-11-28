@@ -10,7 +10,7 @@ from django.utils.html import format_html
 from django.db import transaction
 from openpyxl import load_workbook
 
-from .models import Rule
+from .models import Flow, Rule
 from .forms import RuleSchemaUploadForm
 
 # Mapping from Excel header to Rule model field name.
@@ -160,4 +160,5 @@ class RuleAdmin(admin.ModelAdmin):
 
 
 admin.site.register( UdiFiaWorkflow)
+admin.site.register( Flow)
 admin.site.register( PLMWindchillMockdata)
